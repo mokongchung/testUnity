@@ -43,7 +43,7 @@ public class QuizController : MonoBehaviour
 
 
         StartCoroutine(DownloadImage(questions[numOfQuestion].song.picture));
-        //StartCoroutine(GetAudioClip(questions[numOfQuestion].song.sample));
+        StartCoroutine(GetAudioClip(questions[numOfQuestion].song.sample));
     }
 
     public void Answer(string answer,Button e)
@@ -83,20 +83,60 @@ public class QuizController : MonoBehaviour
     {
         UnityWebRequest request = UnityWebRequestTexture.GetTexture(MediaUrl);
         yield return request.SendWebRequest();
-        Debug.LogFormat("downloadxong");
-        //backgroup.texture  = ((DownloadHandlerTexture)request.downloadHandler).texture;
-        Texture2D tex = ((DownloadHandlerTexture)request.downloadHandler).texture;
-        Sprite sprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(tex.width / 2, tex.height / 2));
-        backgroup.GetComponent<Image>().overrideSprite = sprite;
-        backgroup.enabled = true;
+
+        if(request.isNetworkError || request.isHttpError)
+        {
+            LoadSprite(null);
+        }
+        else
+        {
+            Texture2D tex = ((DownloadHandlerTexture)request.downloadHandler).texture;
+            Sprite sprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(tex.width / 2, tex.height / 2));
+            LoadSprite(sprite);
+        }
+
+
+
+    }
+
+    void LoadSprite(Sprite sprite)
+    {
+        if (sprite != null)
+        {
+            backgroup.GetComponent<Image>().overrideSprite = sprite;
+            backgroup.enabled = true;
+        }
+        else
+        {
+            Debug.Log("Error when loading image from url ");
+        }
     }
 	IEnumerator GetAudioClip(string MediaUrl)
     {
-        UnityWebRequest www = UnityWebRequestMultimedia.GetAudioClip(MediaUrl, AudioType.WAV);
-        yield return www.SendWebRequest();
-        
-        audioSource.clip = DownloadHandlerAudioClip.GetContent(www);
-        audioSource.Play();
+        UnityWebRequest request = UnityWebRequestMultimedia.GetAudioClip(MediaUrl, AudioType.WAV);
+        yield return request.SendWebRequest();
+        if (request.isNetworkError || request.isHttpError)
+        {
+            LoadSong(null);
+        }
+        else
+        {
+            AudioClip audioClip = DownloadHandlerAudioClip.GetContent(request);
+            LoadSong(audioClip);
+        }
 
+
+    }
+    void LoadSong(AudioClip audioClip)
+    {
+        if (audioClip != null)
+        {
+            audioSource.clip = audioClip;
+            audioSource.Play();
+        }
+        else
+        {
+            Debug.Log("Error when loading Audio from url ");
+        }
     }
 }
