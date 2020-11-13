@@ -13,7 +13,7 @@ public class welcomeControler : MonoBehaviour
 	public Button _buttonPlayList3;
     void Start()
     {
-        var fileContents = File.ReadAllText(Application.streamingAssetsPath + "/coding-test-frontend-unity.json");
+        var fileContents = Resources.Load<TextAsset>("coding-test-frontend-unity").text;
         List<Playlist> list = JSONReader.readJson(fileContents.ToString());
 		_buttonPlayList1.GetComponentInChildren<Text>().text = list[0].playlist;
 		_buttonPlayList2.GetComponentInChildren<Text>().text = list[1].playlist;

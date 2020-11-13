@@ -7,7 +7,7 @@ using UnityEngine.SceneManagement;
 public class QuizController : MonoBehaviour
 {
 	Playlist list = null;
-	public RawImage backgroup;
+	public Image backgroup;
 	public AudioSource audioSource;
     public Button btn1;
     public Button btn2;
@@ -43,22 +43,20 @@ public class QuizController : MonoBehaviour
 
 
         StartCoroutine(DownloadImage(questions[numOfQuestion].song.picture));
-        StartCoroutine(GetAudioClip(questions[numOfQuestion].song.sample));
+        //StartCoroutine(GetAudioClip(questions[numOfQuestion].song.sample));
     }
 
     public void Answer(string answer,Button e)
     {
-        Debug.LogFormat("tra loi");
         if (answer == questions[numOfQuestion].song.artist + "\r\n" + questions[numOfQuestion].song.title)
         {
-            Debug.LogFormat("tra loi dung");
+            
             point += 1;
             imgTrue.transform.position = e.transform.position;
             imgTrue.GetComponent<showTrueFlase>().show();
         }
         else
         {
-            Debug.LogFormat("tra loi sai");
             imgFalse.transform.position = e.transform.position;
             imgFalse.GetComponent<showTrueFlase>().show();
         }
@@ -77,6 +75,7 @@ public class QuizController : MonoBehaviour
             numOfQuestion = 0;
             SceneManager.LoadScene("result");
         }
+        backgroup.enabled = false;
     }
 
 
@@ -84,16 +83,18 @@ public class QuizController : MonoBehaviour
     {
         UnityWebRequest request = UnityWebRequestTexture.GetTexture(MediaUrl);
         yield return request.SendWebRequest();
-        if (request.isNetworkError || request.isHttpError)
-            Debug.Log(request.error);
-        else
-           backgroup.texture  = ((DownloadHandlerTexture)request.downloadHandler).texture;
+        Debug.LogFormat("downloadxong");
+        //backgroup.texture  = ((DownloadHandlerTexture)request.downloadHandler).texture;
+        Texture2D tex = ((DownloadHandlerTexture)request.downloadHandler).texture;
+        Sprite sprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(tex.width / 2, tex.height / 2));
+        backgroup.GetComponent<Image>().overrideSprite = sprite;
+        backgroup.enabled = true;
     }
 	IEnumerator GetAudioClip(string MediaUrl)
     {
         UnityWebRequest www = UnityWebRequestMultimedia.GetAudioClip(MediaUrl, AudioType.WAV);
         yield return www.SendWebRequest();
-
+        
         audioSource.clip = DownloadHandlerAudioClip.GetContent(www);
         audioSource.Play();
 
