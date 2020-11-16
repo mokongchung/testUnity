@@ -20,7 +20,9 @@ public class QuizController : MonoBehaviour
 
     private static List<Question> questions;
     private static int numOfQuestion = 0;
-
+    private List<Sprite> listSprite =new List<Sprite>();
+    private List<AudioClip> listAudio = new List<AudioClip>();
+     
     public static List<string> TrueAnswer = new List<string>();
     public static List<string> UserAnswer = new List<string>();
     public static int point=0;
@@ -28,56 +30,65 @@ public class QuizController : MonoBehaviour
     {
         list = JSONReader.ListChoosed;
         questions = list.questions;
-        createquestion();
+        LoadAllSrc();
+        StartCoroutine(waiterAndCreateQ(4));
         UserAnswer = new List<string>();
         TrueAnswer = new List<string>();
         point = 0;
+
     }
 
     public void createquestion() {
         List<Choice> choices = questions[numOfQuestion].choices;
-        btn1.GetComponentInChildren<Text>().text = choices[0].artist + "\r\n" + choices[0].title;
-        btn2.GetComponentInChildren<Text>().text = choices[1].artist + "\r\n" + choices[1].title;
-        btn3.GetComponentInChildren<Text>().text = choices[2].artist + "\r\n" + choices[2].title;
-        btn4.GetComponentInChildren<Text>().text = choices[3].artist + "\r\n" + choices[3].title;
+        btn1.GetComponentInChildren<Text>().text = choices[0].title;
+        btn2.GetComponentInChildren<Text>().text = choices[1].title;
+        btn3.GetComponentInChildren<Text>().text = choices[2].title;
+        btn4.GetComponentInChildren<Text>().text = choices[3].title;
 
-
-        StartCoroutine(DownloadImage(questions[numOfQuestion].song.picture));
-        StartCoroutine(GetAudioClip(questions[numOfQuestion].song.sample));
+        LoadSprite();
+        LoadSong();
     }
 
     public void Answer(string answer,Button e)
     {
-        if (answer == questions[numOfQuestion].song.artist + "\r\n" + questions[numOfQuestion].song.title)
+        if (answer == questions[numOfQuestion].song.title)
         {
             
             point += 1;
-            imgTrue.transform.position = e.transform.position;
+
+            imgTrue.transform.position = e.transform.position + new Vector3(210,0,0);
             imgTrue.GetComponent<showTrueFlase>().show();
         }
         else
         {
-            imgFalse.transform.position = e.transform.position;
+            imgFalse.transform.position = e.transform.position + new Vector3(210, 0, 0);
             imgFalse.GetComponent<showTrueFlase>().show();
         }
 
-        TrueAnswer.Add(questions[numOfQuestion].song.artist + "\r\n" + questions[numOfQuestion].song.title);
+        TrueAnswer.Add( questions[numOfQuestion].song.title);
         UserAnswer.Add(answer);
 
         numOfQuestion += 1;
         if(numOfQuestion < questions.Count)
         {
-            createquestion();
+            StartCoroutine(waiterAndCreateQ(1));
         }
         else
         {
-
             numOfQuestion = 0;
             SceneManager.LoadScene("result");
         }
-        backgroup.enabled = false;
+        //backgroup.enabled = false;
     }
 
+    void LoadAllSrc()
+    {
+        for( int i =0; i < questions.Count; i++)
+        {
+            StartCoroutine(DownloadImage(questions[i].song.picture));
+            StartCoroutine(GetAudioClip(questions[i].song.sample));
+        }
+    }
 
 	IEnumerator DownloadImage(string MediaUrl)
     {
@@ -86,21 +97,24 @@ public class QuizController : MonoBehaviour
 
         if(request.isNetworkError || request.isHttpError)
         {
-            LoadSprite(null);
+            //LoadSprite(null);
         }
         else
         {
             Texture2D tex = ((DownloadHandlerTexture)request.downloadHandler).texture;
             Sprite sprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(tex.width / 2, tex.height / 2));
-            LoadSprite(sprite);
+            //LoadSprite(sprite);
+            listSprite.Add(sprite);
+
         }
 
 
 
     }
 
-    void LoadSprite(Sprite sprite)
+    void LoadSprite()
     {
+        Sprite sprite = listSprite[numOfQuestion];
         if (sprite != null)
         {
             backgroup.GetComponent<Image>().overrideSprite = sprite;
@@ -117,18 +131,21 @@ public class QuizController : MonoBehaviour
         yield return request.SendWebRequest();
         if (request.isNetworkError || request.isHttpError)
         {
-            LoadSong(null);
+            //LoadSong();
         }
         else
         {
-            AudioClip audioClip = DownloadHandlerAudioClip.GetContent(request);
-            LoadSong(audioClip);
+            listAudio.Add( DownloadHandlerAudioClip.GetContent(request));
+            Debug.Log("Audio here ");
+            //LoadSong(audioClip);
         }
 
 
     }
-    void LoadSong(AudioClip audioClip)
+    void LoadSong()
     {
+
+        AudioClip audioClip = listAudio[numOfQuestion];
         if (audioClip != null)
         {
             audioSource.clip = audioClip;
@@ -136,7 +153,23 @@ public class QuizController : MonoBehaviour
         }
         else
         {
-            Debug.Log("Error when loading Audio from url ");
+            Debug.Log("Error when loading image from url ");
         }
     }
+    IEnumerator waiterAndCreateQ(float time)
+    {
+        //Wait for 4 seconds
+        btn1.GetComponent<Button>().enabled = false;
+        btn2.GetComponent<Button>().enabled = false;
+        btn3.GetComponent<Button>().enabled = false;
+        btn4.GetComponent<Button>().enabled = false;
+
+        yield return new WaitForSeconds(time);
+        btn1.GetComponent<Button>().enabled = true;
+        btn2.GetComponent<Button>().enabled = true;
+        btn3.GetComponent<Button>().enabled = true;
+        btn4.GetComponent<Button>().enabled = true;
+        createquestion();
+    }
+
 }
