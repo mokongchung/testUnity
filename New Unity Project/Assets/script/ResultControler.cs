@@ -9,7 +9,7 @@ public class ResultControler : MonoBehaviour
     public Sprite iconTrue;
     public Sprite iconFalse;
     private int Y = 120;
-    // Start is called before the first frame update
+
     void Start()
     {
         List<string> TrueAnswer = QuizController.TrueAnswer;
@@ -25,24 +25,18 @@ public class ResultControler : MonoBehaviour
     void spawPreFab(int no, string userAnswer, string TrueAnswer)
     {
 
-        GameObject a = Instantiate(review, new Vector3(160, Y, 0), Quaternion.identity);
-        a.GetComponentInChildren<Text>().text = userAnswer;
-        
-
-
+        GameObject refabObj = Instantiate(review, new Vector3(160, Y, 0), Quaternion.identity);
+        refabObj.GetComponentInChildren<Text>().text = userAnswer;
         
         if (userAnswer == TrueAnswer)
         {
-            a.GetComponentInChildren<Image>().sprite = iconTrue;
+            refabObj.GetComponentInChildren<Image>().sprite = iconTrue;
         }
         else
         {
-            a.GetComponentInChildren<Image>().sprite = iconFalse;
+            refabObj.GetComponentInChildren<Image>().sprite = iconFalse;
         }
-            
-
-        a.transform.SetParent(GameObject.FindGameObjectWithTag("Canvas").transform, false);
-
+        refabObj.transform.SetParent(GameObject.FindGameObjectWithTag("Canvas").transform, false);
         Y -= 65;
     }
 

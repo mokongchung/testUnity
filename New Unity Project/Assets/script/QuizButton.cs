@@ -10,6 +10,4 @@ public class QuizButton : MonoBehaviour
         QuizController scriptName = canvas.GetComponent<QuizController>();
         scriptName.Answer(this.GetComponentInChildren<Text>().text, this.GetComponent<Button>());
     }
-
-
 }

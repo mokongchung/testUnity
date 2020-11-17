@@ -26,12 +26,13 @@ public class QuizController : MonoBehaviour
     public static List<string> TrueAnswer = new List<string>();
     public static List<string> UserAnswer = new List<string>();
     public static int point=0;
+
     void Start()
     {
         list = JSONReader.ListChoosed;
         questions = list.questions;
         LoadAllSrc();
-        StartCoroutine(waiterAndCreateQ(4));
+        StartCoroutine(waitAndCreateQ(4));
         UserAnswer = new List<string>();
         TrueAnswer = new List<string>();
         point = 0;
@@ -71,14 +72,14 @@ public class QuizController : MonoBehaviour
         numOfQuestion += 1;
         if(numOfQuestion < questions.Count)
         {
-            StartCoroutine(waiterAndCreateQ(1));
+            StartCoroutine(waitAndCreateQ(1));
         }
         else
         {
             numOfQuestion = 0;
             SceneManager.LoadScene("result");
         }
-        //backgroup.enabled = false;
+
     }
 
     void LoadAllSrc()
@@ -97,19 +98,14 @@ public class QuizController : MonoBehaviour
 
         if(request.isNetworkError || request.isHttpError)
         {
-            //LoadSprite(null);
+
         }
         else
         {
             Texture2D tex = ((DownloadHandlerTexture)request.downloadHandler).texture;
             Sprite sprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(tex.width / 2, tex.height / 2));
-            //LoadSprite(sprite);
             listSprite.Add(sprite);
-
         }
-
-
-
     }
 
     void LoadSprite()
@@ -131,13 +127,11 @@ public class QuizController : MonoBehaviour
         yield return request.SendWebRequest();
         if (request.isNetworkError || request.isHttpError)
         {
-            //LoadSong();
+
         }
         else
         {
             listAudio.Add( DownloadHandlerAudioClip.GetContent(request));
-            Debug.Log("Audio here ");
-            //LoadSong(audioClip);
         }
 
 
@@ -153,17 +147,17 @@ public class QuizController : MonoBehaviour
         }
         else
         {
-            Debug.Log("Error when loading image from url ");
+            Debug.Log("Error when loading song from url ");
         }
     }
-    IEnumerator waiterAndCreateQ(float time)
+    IEnumerator waitAndCreateQ(float time)
     {
-        //Wait for 4 seconds
+        
         btn1.GetComponent<Button>().enabled = false;
         btn2.GetComponent<Button>().enabled = false;
         btn3.GetComponent<Button>().enabled = false;
         btn4.GetComponent<Button>().enabled = false;
-
+        //Wait for 4 seconds
         yield return new WaitForSeconds(time);
         btn1.GetComponent<Button>().enabled = true;
         btn2.GetComponent<Button>().enabled = true;
